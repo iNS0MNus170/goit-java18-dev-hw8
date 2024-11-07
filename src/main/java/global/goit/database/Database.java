@@ -1,9 +1,6 @@
 package global.goit.database;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import global.goit.util.PropertiesUtil;
-import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,42 +10,19 @@ import java.sql.SQLException;
 public final class Database {
 
     private static final Logger logger = LoggerFactory.getLogger(Database.class);
-    private static final HikariDataSource dataSource;
+    private static HikariDataSource dataSource;
 
-    static {
-        try {
-            String url = PropertiesUtil.get("db.url");
-            String username = PropertiesUtil.get("db.username");
-            String password = PropertiesUtil.get("db.password");
-
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl(url);
-            config.setUsername(username);
-            config.setPassword(password);
-
-            config.addDataSourceProperty("cachePrepStmts", "true");
-            config.addDataSourceProperty("prepStmtCacheSize", "250");
-            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-
-            dataSource = new HikariDataSource(config);
-
-            String locations = PropertiesUtil.get("flyway.locations");
-            Flyway flyway = Flyway.configure()
-                    .dataSource(dataSource)
-                    .locations(locations)
-                    .load();
-            flyway.migrate();
-
-        } catch (Exception e) {
-            logger.error("Failed to create Hikari DataSource", e);
-            throw new RuntimeException(e);
+    public static void initialize() {
+        if (dataSource == null) {
+            dataSource = DataSourceFactory.createDataSource();
+            DatabaseMigrator.migrateDatabase(dataSource);
         }
     }
 
     public static Connection getConnection() {
         if (dataSource == null) {
             logger.error("DataSource is not initialized");
-            throw new RuntimeException();
+            throw new RuntimeException("DataSource is not initialized");
         }
         try {
             return dataSource.getConnection();
@@ -56,6 +30,5 @@ public final class Database {
             logger.error("Error receiving connection", e);
             throw new RuntimeException(e);
         }
-
     }
 }

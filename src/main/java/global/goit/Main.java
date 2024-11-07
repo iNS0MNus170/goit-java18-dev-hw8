@@ -1,5 +1,6 @@
 package global.goit;
 
+import global.goit.database.Database;
 import global.goit.entity.Client;
 import global.goit.service.ClientService;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-
+        Database.initialize();
         ClientService clientService = new ClientService();
 
         long clientId = clientService.create("Vitaliy Volochay");
