@@ -21,8 +21,9 @@ public final class Database {
 
     public static Connection getConnection() {
         if (dataSource == null) {
-            logger.error("DataSource is not initialized");
-            throw new RuntimeException("DataSource is not initialized");
+            String message = "DataSource is not initialized";
+            logger.error(message);
+            throw new RuntimeException(message);
         }
         try {
             return dataSource.getConnection();
